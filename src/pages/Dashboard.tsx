@@ -8,9 +8,11 @@ import { GameStats } from "@/components/GameStats";
 import { Leaderboard } from "@/components/Leaderboard";
 import { CreateTaskDialog } from "@/components/CreateTaskDialog";
 import { TeamDetailsModal } from "@/components/TeamDetailsModal";
-import { BarChart3, Users, Calendar, Sparkles, TrendingUp } from "lucide-react";
+import { TeamOverview } from "@/components/TeamOverview";
+import { TeamModal } from "@/components/TeamModal";
+import { BarChart3, Users, Calendar, TrendingUp } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { Task, UserStats, LeaderboardEntry } from "@/types/task";
+import { Task, UserStats, LeaderboardEntry, Team } from "@/types/task";
 import heroImage from "@/assets/hero-dashboard.jpg";
 
 // Mock data
@@ -58,11 +60,32 @@ const userStats = {
 };
 
 const leaderboardData = [
-  { id: "1", name: "Alex Thompson", points: 1450, tasksCompleted: 52, streak: 15, department: "Engineering" },
-  { id: "2", name: "Sarah Chen", points: 1380, tasksCompleted: 48, streak: 11, department: "Design" },
-  { id: "3", name: "Marcus Johnson", points: 1250, tasksCompleted: 47, streak: 12, department: "Product" },
-  { id: "4", name: "Emma Davis", points: 1180, tasksCompleted: 43, streak: 8, department: "Marketing" },
-  { id: "5", name: "David Kim", points: 1120, tasksCompleted: 41, streak: 6, department: "Engineering" }
+  { id: "1", name: "Alex Thompson", points: 1450, tasksCompleted: 52, streak: 15, department: "Engineering", teamId: "team1" },
+  { id: "2", name: "Sarah Chen", points: 1380, tasksCompleted: 48, streak: 11, department: "Design", teamId: "team2" },
+  { id: "3", name: "Marcus Johnson", points: 1250, tasksCompleted: 47, streak: 12, department: "Product", teamId: "team1" },
+  { id: "4", name: "Emma Davis", points: 1180, tasksCompleted: 43, streak: 8, department: "Marketing", teamId: "team2" },
+  { id: "5", name: "David Kim", points: 1120, tasksCompleted: 41, streak: 6, department: "Engineering", teamId: "team1" }
+];
+
+const teamsData: Team[] = [
+  {
+    id: "team1",
+    name: "Alpha Squad",
+    description: "High-performance engineering and product team",
+    totalPoints: 3820,
+    memberCount: 3,
+    avgTaskCompletion: 94,
+    members: leaderboardData.filter(member => member.teamId === "team1")
+  },
+  {
+    id: "team2", 
+    name: "Creative Force",
+    description: "Design and marketing excellence team",
+    totalPoints: 2560,
+    memberCount: 2,
+    avgTaskCompletion: 89,
+    members: leaderboardData.filter(member => member.teamId === "team2")
+  }
 ];
 
 export default function Dashboard() {
@@ -70,12 +93,20 @@ export default function Dashboard() {
   const [currentUser] = useState("3"); // Current user is Marcus Johnson
   const [selectedTeamMember, setSelectedTeamMember] = useState<LeaderboardEntry | null>(null);
   const [isTeamModalOpen, setIsTeamModalOpen] = useState(false);
+  const [selectedTeam, setSelectedTeam] = useState<Team | null>(null);
+  const [isTeamDetailsModalOpen, setIsTeamDetailsModalOpen] = useState(false);
   const { toast } = useToast();
 
   const handleCompleteTask = (taskId: string) => {
     setTasks(prev => prev.map(task => {
       if (task.id === taskId) {
-        const updatedTask: Task = { ...task, status: "completed" };
+        const currentUserName = leaderboardData.find(user => user.id === currentUser)?.name || "You";
+        const updatedTask: Task = { 
+          ...task, 
+          status: "completed",
+          completedBy: currentUserName,
+          completedAt: new Date().toISOString()
+        };
         
         // Show enhanced achievement toast
         toast({
@@ -123,6 +154,16 @@ export default function Dashboard() {
     setSelectedTeamMember(null);
   };
 
+  const handleTeamClick = (team: Team) => {
+    setSelectedTeam(team);
+    setIsTeamDetailsModalOpen(true);
+  };
+
+  const handleCloseTeamDetailsModal = () => {
+    setIsTeamDetailsModalOpen(false);
+    setSelectedTeam(null);
+  };
+
   const todoTasks = tasks.filter(task => task.status === "todo");
   const inProgressTasks = tasks.filter(task => task.status === "in-progress");
   const completedTasks = tasks.filter(task => task.status === "completed");
@@ -151,10 +192,6 @@ export default function Dashboard() {
               </p>
               <div className="flex flex-wrap gap-4 justify-center lg:justify-start">
                 <CreateTaskDialog onCreateTask={handleCreateTask} />
-                <Button variant="outline" className="border-white/20 text-white hover:bg-white/10">
-                  <Sparkles className="h-4 w-4 mr-2" />
-                  AI Coach
-                </Button>
               </div>
             </div>
             <div className="lg:w-1/3">
@@ -300,6 +337,9 @@ export default function Dashboard() {
 
           {/* Sidebar */}
           <div className="space-y-6">
+            {/* Team Overview */}
+            <TeamOverview teams={teamsData} onTeamClick={handleTeamClick} />
+
             {/* Leaderboard */}
             <Leaderboard 
               entries={leaderboardData} 
@@ -324,10 +364,6 @@ export default function Dashboard() {
                   <Calendar className="h-4 w-4 mr-2" />
                   Schedule View
                 </Button>
-                <Button variant="outline" className="w-full justify-start">
-                  <Sparkles className="h-4 w-4 mr-2" />
-                  AI Productivity Tips
-                </Button>
               </CardContent>
             </Card>
           </div>
@@ -339,6 +375,13 @@ export default function Dashboard() {
         isOpen={isTeamModalOpen}
         onClose={handleCloseTeamModal}
         member={selectedTeamMember}
+      />
+
+      {/* Team Modal */}
+      <TeamModal
+        isOpen={isTeamDetailsModalOpen}
+        onClose={handleCloseTeamDetailsModal}
+        team={selectedTeam}
       />
     </div>
   );

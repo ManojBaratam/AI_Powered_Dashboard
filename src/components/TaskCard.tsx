@@ -77,6 +77,11 @@ export const TaskCard = ({ task, onComplete, onSubtaskToggle }: TaskCardProps) =
                 <Star className="h-4 w-4 fill-current" />
                 {task.points} points
               </span>
+              {task.status === "completed" && task.completedBy && (
+                <Badge variant="outline" className="text-xs">
+                  Done by {task.completedBy}
+                </Badge>
+              )}
             </div>
           </div>
         </div>

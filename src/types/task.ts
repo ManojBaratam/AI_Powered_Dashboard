@@ -15,6 +15,8 @@ export interface Task {
   points: number;
   subtasks: SubTask[];
   assignedTo?: string;
+  completedBy?: string;
+  completedAt?: string;
 }
 
 export interface UserStats {
@@ -36,4 +38,15 @@ export interface LeaderboardEntry {
   tasksCompleted: number;
   streak: number;
   department: string;
+  teamId: string;
+}
+
+export interface Team {
+  id: string;
+  name: string;
+  description: string;
+  totalPoints: number;
+  memberCount: number;
+  avgTaskCompletion: number;
+  members: LeaderboardEntry[];
 }
