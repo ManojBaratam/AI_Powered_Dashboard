@@ -7,9 +7,10 @@ import { LeaderboardEntry } from "@/types/task";
 interface LeaderboardProps {
   entries: LeaderboardEntry[];
   currentUserId?: string;
+  onMemberClick?: (member: LeaderboardEntry) => void;
 }
 
-export const Leaderboard = ({ entries, currentUserId }: LeaderboardProps) => {
+export const Leaderboard = ({ entries, currentUserId, onMemberClick }: LeaderboardProps) => {
   const getRankIcon = (rank: number) => {
     switch (rank) {
       case 1: 
@@ -52,13 +53,14 @@ export const Leaderboard = ({ entries, currentUserId }: LeaderboardProps) => {
           return (
             <div
               key={entry.id}
-              className={`flex items-center gap-4 p-3 rounded-lg transition-all duration-300 hover:shadow-md ${
+              className={`flex items-center gap-4 p-3 rounded-lg transition-all duration-300 hover:shadow-md cursor-pointer ${
                 getRankStyle(rank)
               } ${
                 isCurrentUser && rank > 3 
                   ? "ring-2 ring-primary bg-primary/5" 
                   : ""
               }`}
+              onClick={() => onMemberClick?.(entry)}
             >
               <div className="flex items-center justify-center w-8">
                 {getRankIcon(rank)}

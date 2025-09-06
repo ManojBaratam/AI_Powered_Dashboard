@@ -7,6 +7,7 @@ import { TaskCard } from "@/components/TaskCard";
 import { GameStats } from "@/components/GameStats";
 import { Leaderboard } from "@/components/Leaderboard";
 import { CreateTaskDialog } from "@/components/CreateTaskDialog";
+import { TeamDetailsModal } from "@/components/TeamDetailsModal";
 import { BarChart3, Users, Calendar, Sparkles, TrendingUp } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Task, UserStats, LeaderboardEntry } from "@/types/task";
@@ -67,6 +68,8 @@ const leaderboardData = [
 export default function Dashboard() {
   const [tasks, setTasks] = useState(initialTasks);
   const [currentUser] = useState("3"); // Current user is Marcus Johnson
+  const [selectedTeamMember, setSelectedTeamMember] = useState<LeaderboardEntry | null>(null);
+  const [isTeamModalOpen, setIsTeamModalOpen] = useState(false);
   const { toast } = useToast();
 
   const handleCompleteTask = (taskId: string) => {
@@ -74,10 +77,16 @@ export default function Dashboard() {
       if (task.id === taskId) {
         const updatedTask: Task = { ...task, status: "completed" };
         
-        // Show achievement toast
+        // Show enhanced achievement toast
         toast({
-          title: `🎉 Task Completed! +${task.points} points`,
-          description: `Great job completing "${task.title}"!`,
+          title: `🎉 Task Completed!`,
+          description: (
+            <div className="space-y-1">
+              <div className="font-semibold">+{task.points} points earned!</div>
+              <div className="text-sm opacity-90">"{task.title}"</div>
+              <div className="text-xs opacity-75">Keep up the great work! 🚀</div>
+            </div>
+          ),
         });
         
         return updatedTask;
@@ -102,6 +111,16 @@ export default function Dashboard() {
 
   const handleCreateTask = (newTask: Task) => {
     setTasks(prev => [...prev, newTask]);
+  };
+
+  const handleTeamMemberClick = (member: LeaderboardEntry) => {
+    setSelectedTeamMember(member);
+    setIsTeamModalOpen(true);
+  };
+
+  const handleCloseTeamModal = () => {
+    setIsTeamModalOpen(false);
+    setSelectedTeamMember(null);
   };
 
   const todoTasks = tasks.filter(task => task.status === "todo");
@@ -282,7 +301,11 @@ export default function Dashboard() {
           {/* Sidebar */}
           <div className="space-y-6">
             {/* Leaderboard */}
-            <Leaderboard entries={leaderboardData} currentUserId={currentUser} />
+            <Leaderboard 
+              entries={leaderboardData} 
+              currentUserId={currentUser} 
+              onMemberClick={handleTeamMemberClick}
+            />
 
             {/* Quick Actions */}
             <Card>
@@ -310,6 +333,13 @@ export default function Dashboard() {
           </div>
         </div>
       </div>
+
+      {/* Team Details Modal */}
+      <TeamDetailsModal
+        isOpen={isTeamModalOpen}
+        onClose={handleCloseTeamModal}
+        member={selectedTeamMember}
+      />
     </div>
   );
 }
