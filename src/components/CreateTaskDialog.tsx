@@ -7,20 +7,24 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Sparkles, Clock, Target } from "lucide-react";
+import { Plus, Sparkles, Clock, Target, Users } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { Task, SubTask } from "@/types/task";
+import { Task, SubTask, Team, LeaderboardEntry } from "@/types/task";
 
 interface CreateTaskDialogProps {
   onCreateTask: (task: Task) => void;
+  teams?: Team[];
+  members?: LeaderboardEntry[];
 }
 
-export const CreateTaskDialog = ({ onCreateTask }: CreateTaskDialogProps) => {
+export const CreateTaskDialog = ({ onCreateTask, teams = [], members = [] }: CreateTaskDialogProps) => {
   const [open, setOpen] = useState(false);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [priority, setPriority] = useState<"low" | "medium" | "high">("medium");
   const [dueDate, setDueDate] = useState("");
+  const [assignedTo, setAssignedTo] = useState<string>("");
+  const [assignedTeam, setAssignedTeam] = useState<string>("");
   const [aiSuggestions, setAiSuggestions] = useState<{ title: string; estimatedHours: number }[]>([]);
   const [isGeneratingAI, setIsGeneratingAI] = useState(false);
   const { toast } = useToast();
@@ -88,7 +92,9 @@ export const CreateTaskDialog = ({ onCreateTask }: CreateTaskDialogProps) => {
       dueDate,
       status: "todo",
       points,
-      subtasks
+      subtasks,
+      assignedTo: assignedTo || undefined,
+      assignedTeam: assignedTeam || undefined
     };
 
     onCreateTask(newTask);
@@ -98,6 +104,8 @@ export const CreateTaskDialog = ({ onCreateTask }: CreateTaskDialogProps) => {
     setDescription("");
     setPriority("medium");
     setDueDate("");
+    setAssignedTo("");
+    setAssignedTeam("");
     setAiSuggestions([]);
     setOpen(false);
     
@@ -174,6 +182,46 @@ export const CreateTaskDialog = ({ onCreateTask }: CreateTaskDialogProps) => {
                   onChange={(e) => setDueDate(e.target.value)}
                   className="mt-1"
                 />
+              </div>
+            </div>
+
+            {/* Assignment Section */}
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="assignedTeam">Assign to Team</Label>
+                <Select value={assignedTeam} onValueChange={setAssignedTeam}>
+                  <SelectTrigger className="mt-1">
+                    <SelectValue placeholder="Select team..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">No team</SelectItem>
+                    {teams.map(team => (
+                      <SelectItem key={team.id} value={team.id}>
+                        <div className="flex items-center gap-2">
+                          <Users className="h-3 w-3" />
+                          {team.name}
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div>
+                <Label htmlFor="assignedTo">Assign to Member</Label>
+                <Select value={assignedTo} onValueChange={setAssignedTo}>
+                  <SelectTrigger className="mt-1">
+                    <SelectValue placeholder="Select member..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">No member</SelectItem>
+                    {members.map(member => (
+                      <SelectItem key={member.id} value={member.id}>
+                        {member.name} - {member.department}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             </div>
           </div>

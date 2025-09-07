@@ -15,6 +15,7 @@ export interface Task {
   points: number;
   subtasks: SubTask[];
   assignedTo?: string;
+  assignedTeam?: string;
   completedBy?: string;
   completedAt?: string;
 }

@@ -10,6 +10,7 @@ import { CreateTaskDialog } from "@/components/CreateTaskDialog";
 import { TeamDetailsModal } from "@/components/TeamDetailsModal";
 import { TeamOverview } from "@/components/TeamOverview";
 import { TeamModal } from "@/components/TeamModal";
+import { TeamManagement } from "@/components/TeamManagement";
 import { BarChart3, Users, Calendar, TrendingUp } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Task, UserStats, LeaderboardEntry, Team } from "@/types/task";
@@ -90,6 +91,7 @@ const teamsData: Team[] = [
 
 export default function Dashboard() {
   const [tasks, setTasks] = useState(initialTasks);
+  const [teams, setTeams] = useState(teamsData);
   const [currentUser] = useState("3"); // Current user is Marcus Johnson
   const [selectedTeamMember, setSelectedTeamMember] = useState<LeaderboardEntry | null>(null);
   const [isTeamModalOpen, setIsTeamModalOpen] = useState(false);
@@ -142,6 +144,10 @@ export default function Dashboard() {
 
   const handleCreateTask = (newTask: Task) => {
     setTasks(prev => [...prev, newTask]);
+  };
+
+  const handleUpdateTeams = (updatedTeams: Team[]) => {
+    setTeams(updatedTeams);
   };
 
   const handleTeamMemberClick = (member: LeaderboardEntry) => {
@@ -239,18 +245,21 @@ export default function Dashboard() {
           <div className="lg:col-span-2">
             <Tabs defaultValue="active" className="w-full">
               <div className="flex items-center justify-between mb-6">
-                <TabsList className="grid w-full max-w-md grid-cols-3">
+                <TabsList className="grid w-full max-w-2xl grid-cols-4">
                   <TabsTrigger value="active">
                     Active ({todoTasks.length + inProgressTasks.length})
                   </TabsTrigger>
                   <TabsTrigger value="completed">
                     Done ({completedTasks.length})
                   </TabsTrigger>
+                  <TabsTrigger value="teams">
+                    Teams ({teams.length})
+                  </TabsTrigger>
                   <TabsTrigger value="all">
                     All ({tasks.length})
                   </TabsTrigger>
                 </TabsList>
-                <CreateTaskDialog onCreateTask={handleCreateTask} />
+                <CreateTaskDialog onCreateTask={handleCreateTask} teams={teams} members={leaderboardData} />
               </div>
 
               <TabsContent value="active" className="space-y-6">
@@ -322,6 +331,15 @@ export default function Dashboard() {
                 )}
               </TabsContent>
 
+              <TabsContent value="teams" className="space-y-4">
+                <TeamManagement 
+                  teams={teams} 
+                  allMembers={leaderboardData} 
+                  onUpdateTeams={handleUpdateTeams}
+                  onTeamClick={handleTeamClick}
+                />
+              </TabsContent>
+
               <TabsContent value="all" className="space-y-4">
                 {tasks.map(task => (
                   <TaskCard 
@@ -338,7 +356,7 @@ export default function Dashboard() {
           {/* Sidebar */}
           <div className="space-y-6">
             {/* Team Overview */}
-            <TeamOverview teams={teamsData} onTeamClick={handleTeamClick} />
+            <TeamOverview teams={teams} onTeamClick={handleTeamClick} />
 
             {/* Leaderboard */}
             <Leaderboard 
