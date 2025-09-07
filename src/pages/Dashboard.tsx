@@ -11,6 +11,7 @@ import { TeamDetailsModal } from "@/components/TeamDetailsModal";
 import { TeamOverview } from "@/components/TeamOverview";
 import { TeamModal } from "@/components/TeamModal";
 import { TeamManagement } from "@/components/TeamManagement";
+import { ScheduleView } from "@/components/ScheduleView";
 import { BarChart3, Users, Calendar, TrendingUp } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Task, UserStats, LeaderboardEntry, Team } from "@/types/task";
@@ -245,7 +246,7 @@ export default function Dashboard() {
           <div className="lg:col-span-2">
             <Tabs defaultValue="active" className="w-full">
               <div className="flex items-center justify-between mb-6">
-                <TabsList className="grid w-full max-w-2xl grid-cols-4">
+                <TabsList className="grid w-full max-w-2xl grid-cols-5">
                   <TabsTrigger value="active">
                     Active ({todoTasks.length + inProgressTasks.length})
                   </TabsTrigger>
@@ -254,6 +255,9 @@ export default function Dashboard() {
                   </TabsTrigger>
                   <TabsTrigger value="teams">
                     Teams ({teams.length})
+                  </TabsTrigger>
+                  <TabsTrigger value="schedule">
+                    Schedule
                   </TabsTrigger>
                   <TabsTrigger value="all">
                     All ({tasks.length})
@@ -340,6 +344,10 @@ export default function Dashboard() {
                 />
               </TabsContent>
 
+              <TabsContent value="schedule" className="space-y-4">
+                <ScheduleView tasks={tasks} teams={teams} />
+              </TabsContent>
+
               <TabsContent value="all" className="space-y-4">
                 {tasks.map(task => (
                   <TaskCard 
@@ -374,7 +382,11 @@ export default function Dashboard() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
-                <Button variant="outline" className="w-full justify-start">
+                <Button 
+                  variant="outline" 
+                  className="w-full justify-start"
+                  onClick={handleTeamClick.bind(null, teams[0])}
+                >
                   <Users className="h-4 w-4 mr-2" />
                   Team Overview
                 </Button>
@@ -390,15 +402,15 @@ export default function Dashboard() {
 
       {/* Team Details Modal */}
       <TeamDetailsModal
-        isOpen={isTeamModalOpen}
-        onClose={handleCloseTeamModal}
-        member={selectedTeamMember}
+        isOpen={isTeamDetailsModalOpen}
+        onClose={handleCloseTeamDetailsModal}
+        team={selectedTeam}
       />
 
       {/* Team Modal */}
       <TeamModal
-        isOpen={isTeamDetailsModalOpen}
-        onClose={handleCloseTeamDetailsModal}
+        isOpen={isTeamModalOpen}
+        onClose={handleCloseTeamModal}
         team={selectedTeam}
       />
     </div>
