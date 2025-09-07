@@ -23,8 +23,8 @@ export const CreateTaskDialog = ({ onCreateTask, teams = [], members = [] }: Cre
   const [description, setDescription] = useState("");
   const [priority, setPriority] = useState<"low" | "medium" | "high">("medium");
   const [dueDate, setDueDate] = useState("");
-  const [assignedTo, setAssignedTo] = useState<string>("");
-  const [assignedTeam, setAssignedTeam] = useState<string>("");
+  const [assignedTo, setAssignedTo] = useState<string>("none");
+  const [assignedTeam, setAssignedTeam] = useState<string>("none");
   const [aiSuggestions, setAiSuggestions] = useState<{ title: string; estimatedHours: number }[]>([]);
   const [isGeneratingAI, setIsGeneratingAI] = useState(false);
   const { toast } = useToast();
@@ -93,8 +93,8 @@ export const CreateTaskDialog = ({ onCreateTask, teams = [], members = [] }: Cre
       status: "todo",
       points,
       subtasks,
-      assignedTo: assignedTo || undefined,
-      assignedTeam: assignedTeam || undefined
+      assignedTo: assignedTo && assignedTo !== "none" ? assignedTo : undefined,
+      assignedTeam: assignedTeam && assignedTeam !== "none" ? assignedTeam : undefined
     };
 
     onCreateTask(newTask);
@@ -104,8 +104,8 @@ export const CreateTaskDialog = ({ onCreateTask, teams = [], members = [] }: Cre
     setDescription("");
     setPriority("medium");
     setDueDate("");
-    setAssignedTo("");
-    setAssignedTeam("");
+    setAssignedTo("none");
+    setAssignedTeam("none");
     setAiSuggestions([]);
     setOpen(false);
     
@@ -194,7 +194,7 @@ export const CreateTaskDialog = ({ onCreateTask, teams = [], members = [] }: Cre
                     <SelectValue placeholder="Select team..." />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">No team</SelectItem>
+                    <SelectItem value="none">No team</SelectItem>
                     {teams.map(team => (
                       <SelectItem key={team.id} value={team.id}>
                         <div className="flex items-center gap-2">
@@ -214,7 +214,7 @@ export const CreateTaskDialog = ({ onCreateTask, teams = [], members = [] }: Cre
                     <SelectValue placeholder="Select member..." />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">No member</SelectItem>
+                    <SelectItem value="none">No member</SelectItem>
                     {members.map(member => (
                       <SelectItem key={member.id} value={member.id}>
                         {member.name} - {member.department}
