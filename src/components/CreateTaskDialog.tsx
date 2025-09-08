@@ -29,6 +29,12 @@ export const CreateTaskDialog = ({ onCreateTask, teams = [], members = [] }: Cre
   const [isGeneratingAI, setIsGeneratingAI] = useState(false);
   const { toast } = useToast();
 
+  // Reset assignedTo when team changes
+  const handleTeamChange = (value: string) => {
+    setAssignedTeam(value);
+    setAssignedTo("none"); // Reset member selection when team changes
+  };
+
   const generateAIBreakdown = async () => {
     if (!title.trim()) {
       toast({
@@ -117,6 +123,14 @@ export const CreateTaskDialog = ({ onCreateTask, teams = [], members = [] }: Cre
 
   const totalEstimatedHours = aiSuggestions.reduce((sum, task) => sum + task.estimatedHours, 0);
 
+  // Get filtered members based on selected team
+  const getFilteredMembers = () => {
+    if (assignedTeam && assignedTeam !== "none") {
+      return members.filter(member => member.teamId === assignedTeam);
+    }
+    return members;
+  };
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
@@ -165,7 +179,7 @@ export const CreateTaskDialog = ({ onCreateTask, teams = [], members = [] }: Cre
                   <SelectTrigger className="mt-1">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="bg-popover border border-border z-50">
                     <SelectItem value="low">Low (10 pts)</SelectItem>
                     <SelectItem value="medium">Medium (15 pts)</SelectItem>
                     <SelectItem value="high">High (25 pts)</SelectItem>
@@ -189,11 +203,11 @@ export const CreateTaskDialog = ({ onCreateTask, teams = [], members = [] }: Cre
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="assignedTeam">Assign to Team</Label>
-                <Select value={assignedTeam} onValueChange={setAssignedTeam}>
+                <Select value={assignedTeam} onValueChange={handleTeamChange}>
                   <SelectTrigger className="mt-1">
                     <SelectValue placeholder="Select team..." />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="bg-popover border border-border z-50">
                     <SelectItem value="none">No team</SelectItem>
                     {teams.map(team => (
                       <SelectItem key={team.id} value={team.id}>
@@ -213,9 +227,9 @@ export const CreateTaskDialog = ({ onCreateTask, teams = [], members = [] }: Cre
                   <SelectTrigger className="mt-1">
                     <SelectValue placeholder="Select member..." />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="bg-popover border border-border z-50">
                     <SelectItem value="none">No member</SelectItem>
-                    {members.map(member => (
+                    {getFilteredMembers().map(member => (
                       <SelectItem key={member.id} value={member.id}>
                         {member.name} - {member.department}
                       </SelectItem>

@@ -92,6 +92,7 @@ const teamsData: Team[] = [
 export default function Dashboard() {
   const [tasks, setTasks] = useState(initialTasks);
   const [teams, setTeams] = useState(teamsData);
+  const [allMembers, setAllMembers] = useState(leaderboardData); // Track all members separately
   const [currentUser] = useState("3"); // Current user is Marcus Johnson
   const [selectedTeamMember, setSelectedTeamMember] = useState<LeaderboardEntry | null>(null);
   const [isTeamModalOpen, setIsTeamModalOpen] = useState(false);
@@ -102,7 +103,7 @@ export default function Dashboard() {
   const handleCompleteTask = (taskId: string) => {
     setTasks(prev => prev.map(task => {
       if (task.id === taskId) {
-        const currentUserName = leaderboardData.find(user => user.id === currentUser)?.name || "You";
+        const currentUserName = getAllMembers().find(user => user.id === currentUser)?.name || "You";
         const updatedTask: Task = { 
           ...task, 
           status: "completed",
@@ -110,24 +111,36 @@ export default function Dashboard() {
           completedAt: new Date().toISOString()
         };
         
-        // Update team member points dynamically
+        // Update member points in both teams and allMembers
         if (task.assignedTo) {
+          // Update teams
           setTeams(prevTeams => prevTeams.map(team => ({
             ...team,
             members: team.members.map(member => {
               if (member.id === task.assignedTo) {
-                const updatedMember = {
+                return {
                   ...member,
                   points: member.points + task.points,
                   tasksCompleted: member.tasksCompleted + 1
                 };
-                return updatedMember;
               }
               return member;
             }),
             totalPoints: team.members.reduce((sum, m) => 
               m.id === task.assignedTo ? sum + m.points + task.points : sum + m.points, 0)
           })));
+
+          // Update allMembers
+          setAllMembers(prevMembers => prevMembers.map(member => {
+            if (member.id === task.assignedTo) {
+              return {
+                ...member,
+                points: member.points + task.points,
+                tasksCompleted: member.tasksCompleted + 1
+              };
+            }
+            return member;
+          }));
         }
         
         // Show enhanced achievement toast
@@ -168,6 +181,20 @@ export default function Dashboard() {
 
   const handleUpdateTeams = (updatedTeams: Team[]) => {
     setTeams(updatedTeams);
+    // Update allMembers when teams change
+    const teamMembers = updatedTeams.flatMap(team => team.members);
+    const memberIds = teamMembers.map(m => m.id);
+    const baseMembers = allMembers.filter(m => !memberIds.includes(m.id));
+    setAllMembers([...teamMembers, ...baseMembers]);
+  };
+
+  // Get all members from all teams dynamically
+  const getAllMembers = (): LeaderboardEntry[] => {
+    const allTeamMembers = teams.flatMap(team => team.members);
+    // Combine with base members, ensuring no duplicates
+    const memberIds = allTeamMembers.map(m => m.id);
+    const baseMembers = allMembers.filter(m => !memberIds.includes(m.id));
+    return [...allTeamMembers, ...baseMembers];
   };
 
   const handleTeamMemberClick = (member: LeaderboardEntry) => {
@@ -279,7 +306,7 @@ export default function Dashboard() {
                     All ({tasks.length})
                   </TabsTrigger>
                 </TabsList>
-                <CreateTaskDialog onCreateTask={handleCreateTask} teams={teams} members={leaderboardData} />
+                <CreateTaskDialog onCreateTask={handleCreateTask} teams={teams} members={getAllMembers()} />
               </div>
 
               <TabsContent value="active" className="space-y-6">
@@ -354,7 +381,7 @@ export default function Dashboard() {
               <TabsContent value="teams" className="space-y-4">
                 <TeamManagement 
                   teams={teams} 
-                  allMembers={leaderboardData} 
+                  allMembers={getAllMembers()} 
                   onUpdateTeams={handleUpdateTeams}
                   onTeamClick={handleTeamClick}
                 />
@@ -380,7 +407,7 @@ export default function Dashboard() {
 
             {/* Leaderboard */}
             <Leaderboard 
-              entries={leaderboardData} 
+              entries={getAllMembers()} 
               currentUserId={currentUser} 
               onMemberClick={handleTeamMemberClick}
             />
