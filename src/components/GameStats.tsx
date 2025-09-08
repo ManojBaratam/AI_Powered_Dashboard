@@ -127,32 +127,6 @@ export const GameStats = ({ stats }: GameStatsProps) => {
           </TooltipContent>
         </Tooltip>
 
-        {/* Badges */}
-        {stats.badges.filter(badge => badge !== "Early Bird" && badge !== "Streak Master").length > 0 && (
-          <Card className="md:col-span-2 lg:col-span-4">
-            <CardHeader>
-              <CardTitle className="text-sm font-medium flex items-center gap-2">
-                <Award className="h-4 w-4" />
-                Achievements ({stats.badges.filter(badge => badge !== "Early Bird" && badge !== "Streak Master").length})
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex flex-wrap gap-2">
-                {stats.badges
-                  .filter(badge => badge !== "Early Bird" && badge !== "Streak Master")
-                  .map((badge) => (
-                  <Badge 
-                    key={badge} 
-                    className="bg-gold text-gold-foreground px-3 py-1 shadow-achievement"
-                  >
-                    <span className="mr-1">{getBadgeIcon(badge)}</span>
-                    {badge}
-                  </Badge>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        )}
       </div>
     </TooltipProvider>
   );
