@@ -2,7 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Trophy, Flame, Target, TrendingUp, CheckCircle } from "lucide-react";
+import { Trophy, Flame, Star, Target, TrendingUp, Award } from "lucide-react";
 import { UserStats } from "@/types/task";
 
 interface GameStatsProps {
@@ -11,6 +11,17 @@ interface GameStatsProps {
 
 export const GameStats = ({ stats }: GameStatsProps) => {
   const levelProgress = 100 - (stats.pointsToNextLevel / 100) * 100;
+  
+  const getBadgeIcon = (badge: string) => {
+    switch (badge) {
+      case "Early Bird": return "🌅";
+      case "Streak Master": return "🔥";
+      case "Perfectionist": return "💎";
+      case "Speed Demon": return "⚡";
+      case "Team Player": return "🤝";
+      default: return "🏆";
+    }
+  };
 
   return (
     <TooltipProvider>
@@ -35,7 +46,7 @@ export const GameStats = ({ stats }: GameStatsProps) => {
               </CardContent>
             </Card>
           </TooltipTrigger>
-          <TooltipContent className="bg-primary text-primary-foreground border-primary">
+          <TooltipContent>
             <p>Your current level based on total points earned. Complete more tasks to level up!</p>
           </TooltipContent>
         </Tooltip>
@@ -61,7 +72,7 @@ export const GameStats = ({ stats }: GameStatsProps) => {
               </CardContent>
             </Card>
           </TooltipTrigger>
-          <TooltipContent className="bg-primary text-primary-foreground border-primary">
+          <TooltipContent>
             <p>Consecutive days completing at least one task. Keep it going!</p>
           </TooltipContent>
         </Tooltip>
@@ -87,7 +98,7 @@ export const GameStats = ({ stats }: GameStatsProps) => {
               </CardContent>
             </Card>
           </TooltipTrigger>
-          <TooltipContent className="bg-primary text-primary-foreground border-primary">
+          <TooltipContent>
             <p>Percentage of tasks you complete before or on their due date</p>
           </TooltipContent>
         </Tooltip>
@@ -95,26 +106,53 @@ export const GameStats = ({ stats }: GameStatsProps) => {
         {/* Tasks Completed */}
         <Tooltip>
           <TooltipTrigger asChild>
-            <Card className="bg-gradient-to-r from-success to-success-glow text-success-foreground cursor-help">
+            <Card className="cursor-help">
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm font-medium flex items-center gap-2">
-                  <CheckCircle className="h-4 w-4" />
+                  <TrendingUp className="h-4 w-4" />
                   Tasks Done
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{stats.tasksCompleted}</div>
-                <div className="text-sm opacity-90">total completed</div>
-                <div className="text-xs opacity-80 mt-1">
+                <div className="text-sm text-muted-foreground">total completed</div>
+                <div className="text-xs text-muted-foreground mt-1">
                   Record: {stats.longestStreak} days
                 </div>
               </CardContent>
             </Card>
           </TooltipTrigger>
-          <TooltipContent className="bg-primary text-primary-foreground border-primary">
+          <TooltipContent>
             <p>Total number of tasks you've completed successfully</p>
           </TooltipContent>
         </Tooltip>
+
+        {/* Badges */}
+        {stats.badges.filter(badge => badge !== "Early Bird" && badge !== "Streak Master").length > 0 && (
+          <Card className="md:col-span-2 lg:col-span-4">
+            <CardHeader>
+              <CardTitle className="text-sm font-medium flex items-center gap-2">
+                <Award className="h-4 w-4" />
+                Achievements ({stats.badges.filter(badge => badge !== "Early Bird" && badge !== "Streak Master").length})
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex flex-wrap gap-2">
+                {stats.badges
+                  .filter(badge => badge !== "Early Bird" && badge !== "Streak Master")
+                  .map((badge) => (
+                  <Badge 
+                    key={badge} 
+                    className="bg-gold text-gold-foreground px-3 py-1 shadow-achievement"
+                  >
+                    <span className="mr-1">{getBadgeIcon(badge)}</span>
+                    {badge}
+                  </Badge>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
       </div>
     </TooltipProvider>
   );

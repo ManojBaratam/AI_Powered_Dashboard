@@ -1,153 +1,220 @@
+import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Card } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Progress } from "@/components/ui/progress";
-import { Users, Trophy, Target, TrendingUp, Calendar, CheckCircle } from "lucide-react";
-
-interface TeamMember {
-  id: string;
-  name: string;
-  department: string;
-  role?: string;
-  tasksCompleted: number;
-  points: number;
-  streak: number;
-  teamId: string;
-}
-
-interface Team {
-  id: string;
-  name: string;
-  members: TeamMember[];
-  totalPoints: number;
-  memberCount: number;
-  avgTaskCompletion: number;
-  description?: string;
-}
+import { 
+  User, 
+  Trophy, 
+  Calendar, 
+  Target, 
+  TrendingUp, 
+  Mail, 
+  Building,
+  Star,
+  Flame,
+  Award
+} from "lucide-react";
+import { LeaderboardEntry } from "@/types/task";
 
 interface TeamDetailsModalProps {
   isOpen: boolean;
   onClose: () => void;
-  team: Team | null;
+  member: LeaderboardEntry | null;
 }
 
-export function TeamDetailsModal({ isOpen, onClose, team }: TeamDetailsModalProps) {
-  if (!team) return null;
+export const TeamDetailsModal = ({ isOpen, onClose, member }: TeamDetailsModalProps) => {
+  if (!member) return null;
 
-  const topPerformer = team.members.reduce((top, member) => 
-    member.points > top.points ? member : top, team.members[0]
-  );
+  // Mock additional details for the team member
+  const memberDetails = {
+    email: `${member.name.toLowerCase().replace(' ', '.')}@company.com`,
+    joinDate: "Jan 15, 2023",
+    completionRate: 94,
+    avgTaskTime: "2.3 days",
+    totalHours: 127,
+    recentBadges: ["Speed Demon", "Team Player", "Perfectionist"],
+    currentProjects: [
+      "Mobile App Redesign",
+      "API Documentation",
+      "User Research Study"
+    ],
+    skillTags: ["React", "TypeScript", "Design Systems", "API Development"]
+  };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+      <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Users className="h-5 w-5" />
-            {team.name} Team Details
+          <DialogTitle className="flex items-center gap-3">
+            <Avatar className="h-12 w-12">
+              <AvatarImage src={member.avatar} />
+              <AvatarFallback>
+                {member.name.split(' ').map(n => n[0]).join('')}
+              </AvatarFallback>
+            </Avatar>
+            <div>
+              <h2 className="text-xl font-bold">{member.name}</h2>
+              <p className="text-sm text-muted-foreground">{member.department} Team</p>
+            </div>
           </DialogTitle>
         </DialogHeader>
 
-        {/* Team Overview Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-          <Card className="p-4">
-            <div className="flex items-center gap-2 mb-2">
-              <Users className="h-4 w-4 text-primary" />
-              <span className="text-sm font-medium text-muted-foreground">Members</span>
-            </div>
-            <div className="text-2xl font-bold">{team.memberCount}</div>
+        <div className="space-y-6">
+          {/* Contact & Basic Info */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg flex items-center gap-2">
+                <User className="h-5 w-5" />
+                Contact Information
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="flex items-center gap-2">
+                <Mail className="h-4 w-4 text-muted-foreground" />
+                <span className="text-sm">{memberDetails.email}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Building className="h-4 w-4 text-muted-foreground" />
+                <span className="text-sm">{member.department} Department</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Calendar className="h-4 w-4 text-muted-foreground" />
+                <span className="text-sm">Joined {memberDetails.joinDate}</span>
+              </div>
+            </CardContent>
           </Card>
 
-          <Card className="p-4">
-            <div className="flex items-center gap-2 mb-2">
-              <Trophy className="h-4 w-4 text-gold" />
-              <span className="text-sm font-medium text-muted-foreground">Total Points</span>
-            </div>
-            <div className="text-2xl font-bold text-gold">{team.totalPoints}</div>
-          </Card>
+          {/* Performance Stats */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Card className="bg-gradient-primary text-primary-foreground">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm flex items-center gap-2">
+                  <Trophy className="h-4 w-4" />
+                  Total Points
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{member.points}</div>
+                <div className="text-sm opacity-90">Ranked #{member.id} this week</div>
+              </CardContent>
+            </Card>
 
-          <Card className="p-4">
-            <div className="flex items-center gap-2 mb-2">
-              <CheckCircle className="h-4 w-4 text-success" />
-              <span className="text-sm font-medium text-muted-foreground">Avg Completion</span>
-            </div>
-            <div className="text-2xl font-bold text-success">{team.avgTaskCompletion}%</div>
-          </Card>
+            <Card className="bg-gradient-achievement text-white">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm flex items-center gap-2">
+                  <Flame className="h-4 w-4" />
+                  Current Streak
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{member.streak}</div>
+                <div className="text-sm opacity-90">consecutive days</div>
+              </CardContent>
+            </Card>
 
-          <Card className="p-4">
-            <div className="flex items-center gap-2 mb-2">
-              <TrendingUp className="h-4 w-4 text-primary" />
-              <span className="text-sm font-medium text-muted-foreground">Avg Points</span>
-            </div>
-            <div className="text-2xl font-bold">{Math.round(team.totalPoints / team.memberCount)}</div>
-          </Card>
-        </div>
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm flex items-center gap-2">
+                  <Target className="h-4 w-4" />
+                  Completion Rate
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{memberDetails.completionRate}%</div>
+                <Progress value={memberDetails.completionRate} className="mt-2" />
+              </CardContent>
+            </Card>
 
-        {/* Top Performer Highlight */}
-        <Card className="p-4 mb-6 bg-gradient-to-r from-gold/10 to-gold/5 border-gold/20">
-          <div className="flex items-center gap-3">
-            <Trophy className="h-5 w-5 text-gold" />
-            <div>
-              <h3 className="font-semibold text-gold">Top Performer</h3>
-              <p className="text-sm text-muted-foreground">
-                {topPerformer.name} - {topPerformer.points} points
-              </p>
-            </div>
-          </div>
-        </Card>
-
-        {/* Team Members List */}
-        <div className="space-y-4">
-          <h3 className="text-lg font-semibold flex items-center gap-2">
-            <Users className="h-5 w-5" />
-            Team Members
-          </h3>
-          
-          <div className="grid gap-4">
-            {team.members.map((member) => (
-              <Card key={member.id} className="p-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <Avatar>
-                      <AvatarFallback className="bg-primary text-primary-foreground">
-                        {member.name.split(' ').map(n => n[0]).join('').toUpperCase()}
-                      </AvatarFallback>
-                    </Avatar>
-                    
-                    <div>
-                      <h4 className="font-semibold">{member.name}</h4>
-                      <p className="text-sm text-muted-foreground">
-                        {member.department}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-4">
-                    {/* Points */}
-                    <div className="text-center">
-                      <div className="text-sm font-semibold text-gold">{member.points}</div>
-                      <div className="text-xs text-muted-foreground">points</div>
-                    </div>
-
-                    {/* Tasks */}
-                    <div className="text-center">
-                      <div className="text-sm font-semibold text-success">{member.tasksCompleted}</div>
-                      <div className="text-xs text-muted-foreground">tasks</div>
-                    </div>
-
-                    {/* Streak */}
-                    <div className="text-center">
-                      <div className="text-sm font-semibold text-orange-500">{member.streak}</div>
-                      <div className="text-xs text-muted-foreground">streak</div>
-                    </div>
-                  </div>
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm flex items-center gap-2">
+                  <TrendingUp className="h-4 w-4" />
+                  Tasks Completed
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{member.tasksCompleted}</div>
+                <div className="text-sm text-muted-foreground">
+                  Avg: {memberDetails.avgTaskTime}
                 </div>
-              </Card>
-            ))}
+              </CardContent>
+            </Card>
           </div>
+
+          {/* Recent Achievements */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Award className="h-5 w-5" />
+                Recent Achievements
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex flex-wrap gap-2">
+                {memberDetails.recentBadges.map((badge) => (
+                  <Badge 
+                    key={badge} 
+                    className="bg-gold text-gold-foreground px-3 py-1 shadow-achievement"
+                  >
+                    <Star className="h-3 w-3 mr-1" />
+                    {badge}
+                  </Badge>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Current Projects */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Building className="h-5 w-5" />
+                Current Projects
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2">
+                {memberDetails.currentProjects.map((project) => (
+                  <div 
+                    key={project}
+                    className="flex items-center justify-between p-2 rounded-md bg-muted/50"
+                  >
+                    <span className="text-sm">{project}</span>
+                    <Badge variant="outline" className="text-xs">
+                      Active
+                    </Badge>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Skills */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Target className="h-5 w-5" />
+                Skills & Technologies
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex flex-wrap gap-2">
+                {memberDetails.skillTags.map((skill) => (
+                  <Badge 
+                    key={skill} 
+                    variant="outline"
+                    className="px-3 py-1"
+                  >
+                    {skill}
+                  </Badge>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </DialogContent>
     </Dialog>
   );
-}
+};
