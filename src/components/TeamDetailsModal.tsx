@@ -143,25 +143,116 @@ export const TeamDetailsModal = ({ isOpen, onClose, member }: TeamDetailsModalPr
             </Card>
           </div>
 
-          {/* Recent Achievements */}
+          {/* Analytics Dashboard */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Award className="h-5 w-5" />
-                Recent Achievements
+                Performance Analytics
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="flex flex-wrap gap-2">
-                {memberDetails.recentBadges.map((badge) => (
-                  <Badge 
-                    key={badge} 
-                    className="bg-gold text-gold-foreground px-3 py-1 shadow-achievement"
-                  >
-                    <Star className="h-3 w-3 mr-1" />
-                    {badge}
-                  </Badge>
-                ))}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Efficiency Chart */}
+                <div className="space-y-2">
+                  <h4 className="text-sm font-medium">Task Efficiency</h4>
+                  <div className="relative w-32 h-32 mx-auto">
+                    <svg className="w-32 h-32 transform -rotate-90" viewBox="0 0 36 36">
+                      <path
+                        d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                        fill="none"
+                        stroke="hsl(var(--muted))"
+                        strokeWidth="2"
+                      />
+                      <path
+                        d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                        fill="none"
+                        stroke="hsl(var(--primary))"
+                        strokeWidth="2"
+                        strokeDasharray={`${memberDetails.completionRate}, 100`}
+                      />
+                    </svg>
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <span className="text-lg font-bold">{memberDetails.completionRate}%</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Performance Chart */}
+                <div className="space-y-2">
+                  <h4 className="text-sm font-medium">Team Performance</h4>
+                  <div className="relative w-32 h-32 mx-auto">
+                    <svg className="w-32 h-32 transform -rotate-90" viewBox="0 0 36 36">
+                      <path
+                        d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                        fill="none"
+                        stroke="hsl(var(--muted))"
+                        strokeWidth="2"
+                      />
+                      <path
+                        d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                        fill="none"
+                        stroke="hsl(var(--success))"
+                        strokeWidth="2"
+                        strokeDasharray="88, 100"
+                      />
+                    </svg>
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <span className="text-lg font-bold">88%</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Time Management Chart */}
+                <div className="space-y-2">
+                  <h4 className="text-sm font-medium">Time Management</h4>
+                  <div className="relative w-32 h-32 mx-auto">
+                    <svg className="w-32 h-32 transform -rotate-90" viewBox="0 0 36 36">
+                      <path
+                        d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                        fill="none"
+                        stroke="hsl(var(--muted))"
+                        strokeWidth="2"
+                      />
+                      <path
+                        d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                        fill="none"
+                        stroke="hsl(var(--warning))"
+                        strokeWidth="2"
+                        strokeDasharray="76, 100"
+                      />
+                    </svg>
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <span className="text-lg font-bold">76%</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Task Completion Chart */}
+                <div className="space-y-2">
+                  <h4 className="text-sm font-medium">Task Completion</h4>
+                  <div className="relative w-32 h-32 mx-auto">
+                    <svg className="w-32 h-32 transform -rotate-90" viewBox="0 0 36 36">
+                      <path
+                        d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                        fill="none"
+                        stroke="hsl(var(--muted))"
+                        strokeWidth="2"
+                      />
+                      <path
+                        d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                        fill="none"
+                        stroke="hsl(var(--gold))"
+                        strokeWidth="2"
+                        strokeDasharray={`${Math.round((member.tasksCompleted / 50) * 100)}, 100`}
+                      />
+                    </svg>
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <span className="text-lg font-bold">{member.tasksCompleted}</span>
+                    </div>
+                  </div>
+                  <p className="text-xs text-center text-muted-foreground">Tasks Done</p>
+                </div>
               </div>
             </CardContent>
           </Card>

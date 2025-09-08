@@ -24,7 +24,9 @@ export const TeamManagement = ({ teams, allMembers, onUpdateTeams, onTeamClick }
   const [selectedTeamForMember, setSelectedTeamForMember] = useState<string>("");
   const [newTeamName, setNewTeamName] = useState("");
   const [newTeamDescription, setNewTeamDescription] = useState("");
-  const [selectedMemberId, setSelectedMemberId] = useState("");
+  const [newMemberEmployeeId, setNewMemberEmployeeId] = useState("");
+  const [newMemberBranch, setNewMemberBranch] = useState("");
+  const [newMemberName, setNewMemberName] = useState("");
   const { toast } = useToast();
 
   const handleCreateTeam = () => {
@@ -59,27 +61,37 @@ export const TeamManagement = ({ teams, allMembers, onUpdateTeams, onTeamClick }
   };
 
   const handleAddMember = () => {
-    if (!selectedTeamForMember || !selectedMemberId) {
+    if (!selectedTeamForMember || !newMemberEmployeeId.trim() || !newMemberBranch.trim() || !newMemberName.trim()) {
       toast({
-        title: "Selection required",
-        description: "Please select both a team and a member.",
+        title: "All fields required",
+        description: "Please fill in employee ID, name, branch, and select a team.",
         variant: "destructive"
       });
       return;
     }
 
-    const member = allMembers.find(m => m.id === selectedMemberId);
-    if (!member) return;
+    // Create new member
+    const newMember: LeaderboardEntry = {
+      id: `emp-${newMemberEmployeeId}`,
+      name: newMemberName,
+      points: 0,
+      tasksCompleted: 0,
+      streak: 0,
+      department: newMemberBranch,
+      teamId: selectedTeamForMember
+    };
 
     const updatedTeams = teams.map(team => {
       if (team.id === selectedTeamForMember) {
-        const updatedMembers = [...team.members, { ...member, teamId: selectedTeamForMember }];
+        const updatedMembers = [...team.members, newMember];
         return {
           ...team,
           members: updatedMembers,
           memberCount: updatedMembers.length,
           totalPoints: updatedMembers.reduce((sum, m) => sum + m.points, 0),
-          avgTaskCompletion: Math.round(updatedMembers.reduce((sum, m) => sum + (m.tasksCompleted * 2), 0) / updatedMembers.length)
+          avgTaskCompletion: updatedMembers.length > 0 
+            ? Math.round(updatedMembers.reduce((sum, m) => sum + (m.tasksCompleted * 2), 0) / updatedMembers.length)
+            : 0
         };
       }
       return team;
@@ -87,12 +99,14 @@ export const TeamManagement = ({ teams, allMembers, onUpdateTeams, onTeamClick }
 
     onUpdateTeams(updatedTeams);
     setSelectedTeamForMember("");
-    setSelectedMemberId("");
+    setNewMemberEmployeeId("");
+    setNewMemberBranch("");
+    setNewMemberName("");
     setIsAddMemberOpen(false);
 
     toast({
       title: "Member added! 👥",
-      description: `${member.name} has been added to the team.`,
+      description: `${newMemberName} has been added to the team.`,
     });
   };
 
@@ -192,7 +206,37 @@ export const TeamManagement = ({ teams, allMembers, onUpdateTeams, onTeamClick }
               </DialogHeader>
               <div className="space-y-4">
                 <div>
-                  <Label>Select Team</Label>
+                  <Label htmlFor="employeeId">Employee ID *</Label>
+                  <Input
+                    id="employeeId"
+                    value={newMemberEmployeeId}
+                    onChange={(e) => setNewMemberEmployeeId(e.target.value)}
+                    placeholder="Enter employee ID..."
+                    className="mt-1"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="memberName">Employee Name *</Label>
+                  <Input
+                    id="memberName"
+                    value={newMemberName}
+                    onChange={(e) => setNewMemberName(e.target.value)}
+                    placeholder="Enter employee name..."
+                    className="mt-1"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="branch">Branch/Department *</Label>
+                  <Input
+                    id="branch"
+                    value={newMemberBranch}
+                    onChange={(e) => setNewMemberBranch(e.target.value)}
+                    placeholder="Enter branch or department..."
+                    className="mt-1"
+                  />
+                </div>
+                <div>
+                  <Label>Select Team *</Label>
                   <Select value={selectedTeamForMember} onValueChange={setSelectedTeamForMember}>
                     <SelectTrigger className="mt-1">
                       <SelectValue placeholder="Choose a team..." />
@@ -201,21 +245,6 @@ export const TeamManagement = ({ teams, allMembers, onUpdateTeams, onTeamClick }
                       {teams.map(team => (
                         <SelectItem key={team.id} value={team.id}>
                           {team.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <Label>Select Member</Label>
-                  <Select value={selectedMemberId} onValueChange={setSelectedMemberId}>
-                    <SelectTrigger className="mt-1">
-                      <SelectValue placeholder="Choose a member..." />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {getAvailableMembers().map(member => (
-                        <SelectItem key={member.id} value={member.id}>
-                          {member.name} - {member.department}
                         </SelectItem>
                       ))}
                     </SelectContent>

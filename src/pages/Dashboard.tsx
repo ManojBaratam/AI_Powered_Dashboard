@@ -110,6 +110,26 @@ export default function Dashboard() {
           completedAt: new Date().toISOString()
         };
         
+        // Update team member points dynamically
+        if (task.assignedTo) {
+          setTeams(prevTeams => prevTeams.map(team => ({
+            ...team,
+            members: team.members.map(member => {
+              if (member.id === task.assignedTo) {
+                const updatedMember = {
+                  ...member,
+                  points: member.points + task.points,
+                  tasksCompleted: member.tasksCompleted + 1
+                };
+                return updatedMember;
+              }
+              return member;
+            }),
+            totalPoints: team.members.reduce((sum, m) => 
+              m.id === task.assignedTo ? sum + m.points + task.points : sum + m.points, 0)
+          })));
+        }
+        
         // Show enhanced achievement toast
         toast({
           title: `🎉 Task Completed!`,
